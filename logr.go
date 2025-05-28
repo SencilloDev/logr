@@ -74,12 +74,14 @@ func NewLogger() *Logger {
 	}
 }
 
-func (l *Logger) log(lvl Level, s interface{}) {
+func (l *Logger) log(lvl Level, s any) {
+	timeLevel := fmt.Sprintf(`timestamp=%s level=%s `, time.Now().Format(format), lvl.name)
+	l.SetPrefix(timeLevel)
 	if lvl.val <= l.Level.val {
 		if l.contextMessage != "" {
-			l.Printf(`timestamp=%s level=%s msg=%q%s`, time.Now().Format(format), lvl.name, s, l.contextMessage)
+			l.Printf(`msg=%q%s`, s, l.contextMessage)
 		} else {
-			l.Printf(`timestamp=%s level=%s msg=%q`, time.Now().Format(format), lvl.name, s)
+			l.Printf(`msg=%q`, s)
 		}
 	}
 }
@@ -98,79 +100,87 @@ func (l *Logger) WithContext(s map[string]string) *Logger {
 	c.contextMessage = context
 
 	return c
+}
+
+func (l *Logger) WithSource() *Logger {
+	_, file, line, _ := runtime.Caller(1)
+	return l.WithContext(map[string]string{
+		"file": file,
+		"line": fmt.Sprintf(`%d`, line),
+	})
 
 }
 
-func (l *Logger) Error(s interface{}) {
+func (l *Logger) Error(s any) {
 	l.log(ErrorLevel, s)
 }
 
-func (l *Logger) Errorf(format string, s ...interface{}) {
+func (l *Logger) Errorf(format string, s ...any) {
 	f := fmt.Sprintf(`%s`, format)
 	m := fmt.Sprintf(f, s...)
 	l.log(ErrorLevel, m)
 }
 
-func (l *Logger) Info(s interface{}) {
+func (l *Logger) Info(s any) {
 	l.log(InfoLevel, s)
 }
 
-func (l *Logger) Infof(format string, s ...interface{}) {
+func (l *Logger) Infof(format string, s ...any) {
 	f := fmt.Sprintf(`%s`, format)
 	m := fmt.Sprintf(f, s...)
 	l.log(InfoLevel, m)
 }
 
-func (l *Logger) Debug(s interface{}) {
+func (l *Logger) Debug(s any) {
 	l.log(DebugLevel, s)
 }
 
-func (l *Logger) Debugf(format string, s ...interface{}) {
+func (l *Logger) Debugf(format string, s ...any) {
 	f := fmt.Sprintf(`%s`, format)
 	m := fmt.Sprintf(f, s...)
 	l.log(DebugLevel, m)
 }
 
-func (l *Logger) Fatal(s interface{}) {
+func (l *Logger) Fatal(s any) {
 	m := fmt.Sprintf(`level=FATAL msg=%s`, s)
 	l.Logger.Fatal(m)
 }
 
-func (l *Logger) Fatalf(format string, s ...interface{}) {
+func (l *Logger) Fatalf(format string, s ...any) {
 	f := fmt.Sprintf(`level=FATAL msg=%s`, format)
 	m := fmt.Sprintf(f, s...)
 	l.Logger.Fatal(m)
 }
 
-func Error(s interface{}) {
+func Error(s any) {
 	std.Error(s)
 }
 
-func Errorf(format string, s ...interface{}) {
+func Errorf(format string, s ...any) {
 	std.Errorf(format, s...)
 }
 
-func Info(s interface{}) {
+func Info(s any) {
 	std.Info(s)
 }
 
-func Infof(format string, s ...interface{}) {
+func Infof(format string, s ...any) {
 	std.Infof(format, s...)
 }
 
-func Debug(s interface{}) {
+func Debug(s any) {
 	std.Debug(s)
 }
 
-func Debugf(format string, s ...interface{}) {
+func Debugf(format string, s ...any) {
 	std.Debugf(format, s...)
 }
 
-func Fatal(s interface{}) {
+func Fatal(s any) {
 	std.Fatal(s)
 }
 
-func Fatalf(format string, s ...interface{}) {
+func Fatalf(format string, s ...any) {
 	std.Fatalf(format, s...)
 }
 
