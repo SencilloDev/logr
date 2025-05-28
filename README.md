@@ -32,6 +32,10 @@ func main() {
     functionContext := map[string]string{"function", logr.GetCaller()}
     ctx := logger.WithContext(functionContext)
     ctx.Info("another message")
+
+    // You can also enable source logging
+    sLogger := logger.WithSource()
+    sLogger.Info("log with source file and line")
 }
 ```
 
